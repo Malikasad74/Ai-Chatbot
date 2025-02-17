@@ -6,7 +6,9 @@ Welcome to the AI Chatbot, your personal virtual assistant powered by advanced n
 ## 📸 App Previews
 Check out the AI Chatbot in action:
 
+![Alt text](assets/icons/home.jpg)
 
+![Alt text](assets/icons/generate.jpg)
 
 
 
