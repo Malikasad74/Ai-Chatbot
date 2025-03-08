@@ -20,8 +20,8 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     model = GenerativeModel(
-      model: 'gemini-pro',
-      apiKey: "AIzaSyDWk3RNJgPcNYDzx-xIYlxgDIgtu-nHTb4",
+      model: 'gemini-1.5-pro',
+      apiKey: "AIzaSyAUMeZIAkrbnjr4V6Dmp-vOM1d9mAcqRXk",
     );
   }
 
@@ -51,26 +51,24 @@ class _ChatScreenState extends State<ChatScreen> {
 
     try {
       final content = [Content.text(message)];
-      final responseStream = model.generateContentStream(content);
+      final response = await model.generateContent(content);
 
-      String aiResponse = "";
-      await for (final chunk in responseStream) {
+      if (response.text != null) {
         setState(() {
-          aiResponse += chunk.text ?? "";
+          _messages.add(Message(isUser: false, message: response.text!, date: DateTime.now()));
+        });
+      } else {
+        setState(() {
+          _messages.add(Message(isUser: false, message: "Error: No response from AI", date: DateTime.now()));
         });
       }
-
-      setState(() {
-        _messages.add(Message(isUser: false, message: aiResponse, date: DateTime.now()));
-        _isTyping = false;
-      });
     } catch (e) {
       setState(() {
         _messages.add(Message(isUser: false, message: "Error: ${e.toString()}", date: DateTime.now()));
-        _isTyping = false;
       });
     }
 
+    setState(() => _isTyping = false);
     _scrollToBottom();
   }
 
@@ -90,7 +88,7 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             Expanded(
               child: _messages.isEmpty
-                  ? Center(
+                  ? const Center(
                 child: Text(
                   "No messages yet. Start a conversation!",
                   style: TextStyle(color: Colors.white70, fontSize: 16),
@@ -112,7 +110,6 @@ class _ChatScreenState extends State<ChatScreen> {
                 },
               ),
             ),
-
             _buildInputField(),
           ],
         ),
@@ -247,37 +244,9 @@ class TypingIndicator extends StatelessWidget {
             bottomRight: Radius.circular(10),
           ),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _dot(),
-            const SizedBox(width: 4),
-            _dot(delay: 200),
-            const SizedBox(width: 4),
-            _dot(delay: 400),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _dot({int delay = 0}) {
-    return TweenAnimationBuilder(
-      tween: Tween(begin: 0.3, end: 1.0),
-      duration: const Duration(milliseconds: 800),
-      curve: Curves.easeInOut,
-      builder: (context, value, child) {
-        return Opacity(
-          opacity: value,
-          child: child,
-        );
-      },
-      child: Container(
-        width: 8,
-        height: 8,
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white,
+        child: const Text(
+          "Typing...",
+          style: TextStyle(color: Colors.white70),
         ),
       ),
     );
